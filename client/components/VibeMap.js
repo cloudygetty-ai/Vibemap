@@ -17,9 +17,9 @@ export default function VibeMap() {
     });
 
     // Watch Geolocation
-    navigator.geolocation.watchPosition((pos) => {
+    const watchId = navigator.geolocation.watchPosition((pos) => {
       const { latitude, longitude } = pos.coords;
-      socket.emit('update_location', { userId: 'me', lat: latitude, lng: longitude });
+      socket.emit('update_location', { userId: socket.id, lat: latitude, lng: longitude });
     });
 
     // Add 3D Building Layer
@@ -36,6 +36,11 @@ export default function VibeMap() {
         }
       });
     });
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+      if (map.current) map.current.remove();
+    };
   }, []);
 
   return <div ref={mapContainer} className="w-full h-screen bg-black" />;
