@@ -1,0 +1,20 @@
+{
+  "name": "vibemap",
+  "private": true,
+  "scripts": {
+    "test": "jest --verbose",
+    "test:server": "jest --verbose --testPathPattern=server",
+    "test:client": "jest --verbose --testPathPattern=client",
+    "test:coverage": "jest --coverage"
+  },
+  "devDependencies": {
+    "@babel/preset-env": "^7.29.0",
+    "@babel/preset-react": "^7.28.5",
+    "@testing-library/jest-dom": "^6.6.0",
+    "@testing-library/react": "^16.1.0",
+    "jest": "^29.7.0",
+    "jest-environment-jsdom": "^29.7.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  }
+}
