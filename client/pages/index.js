@@ -10,10 +10,10 @@ export default function Home() {
       <Head>
         <title>VibeMap Pro</title>
         <meta name="description" content="Real-Time Urban Discovery" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover" />
         <link rel="manifest" href="/manifest.json" />
       </Head>
-      <main className="relative w-full h-screen bg-black">
+      <main className="relative w-full bg-black" style={{ height: '100dvh' }}>
         <VibeMap />
         <VibeControl activeLocation={{ id: 'default' }} />
       </main>
