@@ -38,6 +38,15 @@ const pg = new Pool({ connectionString: process.env.DATABASE_URL });
       socket.join(roomId);
       socket.to(roomId).emit('user_joined_call', { userId: socket.id });
     });
+
+    // WEBRTC SIGNAL RELAY
+    socket.on('signal', ({ roomId, signal }) => {
+      socket.to(roomId).emit('signal', { signal, userId: socket.id });
+    });
+
+    socket.on('disconnect', async () => {
+      await redis.zRem('active_vibers', socket.id).catch(() => {});
+    });
   });
 })();
 
