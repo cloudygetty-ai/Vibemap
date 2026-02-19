@@ -1,7 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import io from 'socket.io-client';
-
-const socket = io(process.env.NEXT_PUBLIC_SERVER_URL);
+import socket from '../lib/socket';
 
 export default function VideoRoom({ roomId }) {
   const localVideoRef = useRef(null);

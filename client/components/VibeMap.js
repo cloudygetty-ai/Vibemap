@@ -1,9 +1,8 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef } from 'react';
 import mapboxgl from 'mapbox-gl';
-import io from 'socket.io-client';
+import socket from '../lib/socket';
 
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
-const socket = io(process.env.NEXT_PUBLIC_SERVER_URL);
 
 // Stable anonymous session ID — persisted across page refreshes, unique per browser
 function getSessionId() {
@@ -19,6 +18,9 @@ function getSessionId() {
 export default function VibeMap({ onLocationSelect }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
+  // Ref keeps the click handler always current without re-initialising the map
+  const onLocationSelectRef = useRef(onLocationSelect);
+  onLocationSelectRef.current = onLocationSelect;
 
   useEffect(() => {
     map.current = new mapboxgl.Map({
@@ -35,12 +37,11 @@ export default function VibeMap({ onLocationSelect }) {
       socket.emit('update_location', { userId, lat: latitude, lng: longitude });
     });
 
-    // Emit clicked location to parent so VibeControl can open
+    // Emit clicked location to parent so VibeControl can open.
+    // Reading from the ref avoids a stale closure without re-running this effect.
     map.current.on('click', (e) => {
       const { lat, lng } = e.lngLat;
-      if (onLocationSelect) {
-        onLocationSelect({ id: `${lat.toFixed(5)},${lng.toFixed(5)}`, lat, lng });
-      }
+      onLocationSelectRef.current?.({ id: `${lat.toFixed(5)},${lng.toFixed(5)}`, lat, lng });
     });
 
     // Add 3D Building Layer
