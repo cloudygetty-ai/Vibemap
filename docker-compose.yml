@@ -10,6 +10,7 @@ services:
       POSTGRES_DB: vibemap
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      # schema.sql seeds a brand-new database; ongoing changes go through migrations
       - ./schema.sql:/docker-entrypoint-initdb.d/schema.sql:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U vibemap"]
@@ -39,6 +40,8 @@ services:
       REDIS_URL: redis://redis:6379
       PORT: 4000
       CORS_ORIGIN: http://localhost:3000
+    volumes:
+      - ./db:/app/db:ro
     ports:
       - "4000:4000"
     depends_on:

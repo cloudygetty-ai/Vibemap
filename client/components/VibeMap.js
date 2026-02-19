@@ -5,6 +5,17 @@ import io from 'socket.io-client';
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_TOKEN;
 const socket = io(process.env.NEXT_PUBLIC_SERVER_URL);
 
+// Stable anonymous session ID — persisted across page refreshes, unique per browser
+function getSessionId() {
+  const key = 'vibemap_session_id';
+  let id = localStorage.getItem(key);
+  if (!id) {
+    id = crypto.randomUUID();
+    localStorage.setItem(key, id);
+  }
+  return id;
+}
+
 export default function VibeMap() {
   const mapContainer = useRef(null);
   const map = useRef(null);
@@ -16,10 +27,12 @@ export default function VibeMap() {
       center: [-73.98, 40.75], zoom: 15, pitch: 65, bearing: -20
     });
 
+    const userId = getSessionId();
+
     // Watch Geolocation
     navigator.geolocation.watchPosition((pos) => {
       const { latitude, longitude } = pos.coords;
-      socket.emit('update_location', { userId: 'me', lat: latitude, lng: longitude });
+      socket.emit('update_location', { userId, lat: latitude, lng: longitude });
     });
 
     // Add 3D Building Layer
