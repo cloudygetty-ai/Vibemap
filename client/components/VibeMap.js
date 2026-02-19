@@ -16,7 +16,7 @@ function getSessionId() {
   return id;
 }
 
-export default function VibeMap() {
+export default function VibeMap({ onLocationSelect }) {
   const mapContainer = useRef(null);
   const map = useRef(null);
 
@@ -29,10 +29,18 @@ export default function VibeMap() {
 
     const userId = getSessionId();
 
-    // Watch Geolocation
-    navigator.geolocation.watchPosition((pos) => {
+    // Watch Geolocation and broadcast to server
+    const watchId = navigator.geolocation.watchPosition((pos) => {
       const { latitude, longitude } = pos.coords;
       socket.emit('update_location', { userId, lat: latitude, lng: longitude });
+    });
+
+    // Emit clicked location to parent so VibeControl can open
+    map.current.on('click', (e) => {
+      const { lat, lng } = e.lngLat;
+      if (onLocationSelect) {
+        onLocationSelect({ id: `${lat.toFixed(5)},${lng.toFixed(5)}`, lat, lng });
+      }
     });
 
     // Add 3D Building Layer
@@ -49,6 +57,11 @@ export default function VibeMap() {
         }
       });
     });
+
+    return () => {
+      navigator.geolocation.clearWatch(watchId);
+      map.current?.remove();
+    };
   }, []);
 
   return <div ref={mapContainer} className="w-full h-screen bg-black" />;

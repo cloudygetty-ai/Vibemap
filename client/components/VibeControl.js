@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import StreetViewer from './StreetViewer';
 import VideoRoom from './VideoRoom';
 
@@ -12,7 +13,7 @@ export default function VibeControl({ activeLocation }) {
       </div>
 
       {viewMode === 'street' ? (
-        <div id="street-view-container" className="w-full h-full rounded-xl" />
+        <StreetViewer location={activeLocation} />
       ) : (
         <VideoRoom roomId={activeLocation.id} />
       )}

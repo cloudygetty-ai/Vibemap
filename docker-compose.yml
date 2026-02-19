@@ -40,8 +40,6 @@ services:
       REDIS_URL: redis://redis:6379
       PORT: 4000
       CORS_ORIGIN: http://localhost:3000
-    volumes:
-      - ./db:/app/db:ro
     ports:
       - "4000:4000"
     depends_on:

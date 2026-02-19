@@ -4,10 +4,10 @@
   "description": "VibeMap Pro - Backend API and Socket.io server",
   "main": "index.js",
   "scripts": {
-    "start": "node ../db/migrate.js && node index.js",
-    "dev": "node ../db/migrate.js && nodemon index.js",
+    "start": "node ./db/migrate.js && node index.js",
+    "dev": "node ./db/migrate.js && nodemon index.js",
     "test": "node --test test/validation.test.js",
-    "migrate": "node ../db/migrate.js"
+    "migrate": "node ./db/migrate.js"
   },
   "engines": {
     "node": ">=18.0.0"
