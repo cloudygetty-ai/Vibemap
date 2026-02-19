@@ -15,13 +15,19 @@ export default function Home() {
         <title>VibeMap Pro</title>
         <meta name="description" content="Real-time urban discovery PWA" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="manifest" href="/manifest.json" />
         <meta name="theme-color" content="#000000" />
       </Head>
 
       <main className="relative w-full h-screen overflow-hidden bg-black">
         <VibeMap onLocationSelect={setActiveLocation} />
-        {activeLocation && <VibeControl activeLocation={activeLocation} />}
+        {activeLocation && (
+          <VibeControl
+            activeLocation={activeLocation}
+            onClose={() => setActiveLocation(null)}
+          />
+        )}
       </main>
     </>
   );

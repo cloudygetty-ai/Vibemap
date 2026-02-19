@@ -32,10 +32,16 @@ export default function VibeMap({ onLocationSelect }) {
     const userId = getSessionId();
 
     // Watch Geolocation and broadcast to server
-    const watchId = navigator.geolocation.watchPosition((pos) => {
-      const { latitude, longitude } = pos.coords;
-      socket.emit('update_location', { userId, lat: latitude, lng: longitude });
-    });
+    const watchId = navigator.geolocation.watchPosition(
+      (pos) => {
+        const { latitude, longitude } = pos.coords;
+        socket.emit('update_location', { userId, lat: latitude, lng: longitude });
+      },
+      (err) => {
+        console.warn('Geolocation error:', err.message);
+      },
+      { enableHighAccuracy: true }
+    );
 
     // Emit clicked location to parent so VibeControl can open.
     // Reading from the ref avoids a stale closure without re-running this effect.
