@@ -1,20 +1,40 @@
 import { useEffect, useRef, useState } from 'react';
 import socket from '../lib/socket';
 
+const ICE_SERVERS = { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] };
+
 export default function VideoRoom({ roomId }) {
   const localVideoRef = useRef(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
   const peerConnections = useRef({});
   const localStream = useRef(null);
 
-  const iceServers = {
-    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }],
-  };
-
   useEffect(() => {
     if (!roomId) return;
 
     let mounted = true;
+
+    function createPeerConnection(userId) {
+      const pc = new RTCPeerConnection(ICE_SERVERS);
+      peerConnections.current[userId] = pc;
+
+      localStream.current?.getTracks().forEach((track) => {
+        pc.addTrack(track, localStream.current);
+      });
+
+      pc.onicecandidate = ({ candidate }) => {
+        if (candidate) socket.emit('rtc_ice_candidate', { to: userId, candidate });
+      };
+
+      pc.ontrack = ({ streams }) => {
+        setRemoteStreams((prev) => {
+          const already = prev.find((s) => s.id === streams[0].id);
+          return already ? prev : [...prev, streams[0]];
+        });
+      };
+
+      return pc;
+    }
 
     async function startMedia() {
       try {
@@ -76,30 +96,6 @@ export default function VideoRoom({ roomId }) {
       localStream.current?.getTracks().forEach((t) => t.stop());
     };
   }, [roomId]);
-
-  function createPeerConnection(userId) {
-    const pc = new RTCPeerConnection(iceServers);
-    peerConnections.current[userId] = pc;
-
-    localStream.current?.getTracks().forEach((track) => {
-      pc.addTrack(track, localStream.current);
-    });
-
-    pc.onicecandidate = ({ candidate }) => {
-      if (candidate) {
-        socket.emit('rtc_ice_candidate', { to: userId, candidate });
-      }
-    };
-
-    pc.ontrack = ({ streams }) => {
-      setRemoteStreams((prev) => {
-        const already = prev.find((s) => s.id === streams[0].id);
-        return already ? prev : [...prev, streams[0]];
-      });
-    };
-
-    return pc;
-  }
 
   return (
     <div className="relative w-full h-full flex flex-wrap gap-2 overflow-auto">
