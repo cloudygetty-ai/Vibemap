@@ -7,6 +7,7 @@ export default function VideoRoom({ roomId }) {
   const localVideoRef = useRef(null);
   const [remoteStreams, setRemoteStreams] = useState([]);
   const peerConnections = useRef({});
+  const peerStreams = useRef({});       // userId → MediaStream
   const localStream = useRef(null);
 
   useEffect(() => {
@@ -27,6 +28,7 @@ export default function VideoRoom({ roomId }) {
       };
 
       pc.ontrack = ({ streams }) => {
+        peerStreams.current[userId] = streams[0];
         setRemoteStreams((prev) => {
           const already = prev.find((s) => s.id === streams[0].id);
           return already ? prev : [...prev, streams[0]];
@@ -81,18 +83,32 @@ export default function VideoRoom({ roomId }) {
         const pc = peerConnections.current[from];
         if (pc) pc.addIceCandidate(new RTCIceCandidate(candidate));
       });
+
+      socket.on('user_left_call', ({ userId }) => {
+        if (!mounted) return;
+        const pc = peerConnections.current[userId];
+        if (pc) { pc.close(); delete peerConnections.current[userId]; }
+        const stream = peerStreams.current[userId];
+        if (stream) {
+          setRemoteStreams((prev) => prev.filter((s) => s.id !== stream.id));
+          delete peerStreams.current[userId];
+        }
+      });
     }
 
     startMedia();
 
     return () => {
       mounted = false;
+      socket.emit('leave_video_room', roomId);
       socket.off('user_joined_call');
       socket.off('rtc_offer');
       socket.off('rtc_answer');
       socket.off('rtc_ice_candidate');
+      socket.off('user_left_call');
       Object.values(peerConnections.current).forEach((pc) => pc.close());
       peerConnections.current = {};
+      peerStreams.current = {};
       localStream.current?.getTracks().forEach((t) => t.stop());
     };
   }, [roomId]);

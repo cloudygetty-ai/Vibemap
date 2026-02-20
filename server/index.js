@@ -113,8 +113,15 @@ redis.on('error', (err) => log.error({ err }, 'Redis error'));
 
     // WEBRTC SIGNALING
     socket.on('join_video_room', (roomId) => {
+      if (typeof roomId !== 'string' || roomId.length > 128) return;
       socket.join(roomId);
       socket.to(roomId).emit('user_joined_call', { userId: socket.id });
+    });
+
+    socket.on('leave_video_room', (roomId) => {
+      if (typeof roomId !== 'string' || roomId.length > 128) return;
+      socket.leave(roomId);
+      socket.to(roomId).emit('user_left_call', { userId: socket.id });
     });
 
     socket.on('rtc_offer', ({ to, offer }) => {
@@ -130,6 +137,12 @@ redis.on('error', (err) => log.error({ err }, 'Redis error'));
     });
 
     socket.on('disconnect', () => {
+      // Notify any video rooms this socket was still in
+      for (const roomId of socket.rooms) {
+        if (roomId !== socket.id) {
+          socket.to(roomId).emit('user_left_call', { userId: socket.id });
+        }
+      }
       locationLimiter.remove(socket.id);
       vibeLimiter.remove(socket.id);
       log.info({ socketId: socket.id }, 'Socket disconnected');
