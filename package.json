@@ -1,0 +1,17 @@
+{
+  "name": "vibemap",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VibeMap — Real-time social vibe map with street-level video rooms and mood-based discovery",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/cloudygetty-ai/Vibemap.git"
+  },
+  "license": "MIT",
+  "keywords": ["map", "social", "vibe", "next.js", "webrtc", "location"],
+  "scripts": {
+    "dev:client": "cd client && npm run dev",
+    "dev:server": "cd server && node index.js",
+    "install:all": "cd client && npm install && cd ../server && npm install"
+  }
+}
