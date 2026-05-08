@@ -1,7 +1,6 @@
 # CLAUDE.md — Sentinel Engine v5.0 × GOD-MODE V3
 
- What do you want Gemini to remember?
-Gemini.md
+ 
 
 Direct
 
